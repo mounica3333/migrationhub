@@ -1,0 +1,29 @@
+name: mounica8014143/GitlabtoGithub
+on:
+  push:
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: true
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    container:
+      image: busybox
+    if: ${{ github.ref }} == $CI_DEFAULT_BRANCH
+    timeout-minutes: 60
+    steps:
+    - uses: actions/checkout@v4.1.0
+      with:
+        fetch-depth: 20
+        lfs: true
+    - run: echo "The site will be deployed to $CI_PAGES_URL"
+    - uses: actions/upload-artifact@v4.1.0
+      if: success()
+      with:
+        name: "${{ github.job }}"
+        path: public
+    - uses: JamesIves/github-pages-deploy-action@v4.5.0
+      with:
+        branch: gh-pages
+        folder: public
